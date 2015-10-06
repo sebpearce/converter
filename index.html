@@ -1,0 +1,158 @@
+<!DOCTYPE html>  
+
+<html lang="en">  
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="style.css" />
+
+  <title>Converter</title>  
+
+<style>
+
+  body {
+    color: #252D3C;
+    font-family: 'Open Sans';
+  }
+  
+  .number-display {
+    width: 500px;
+    margin: 0 auto;
+    padding: 1em 0;
+    display: block;
+    /*background-color: red;*/
+    text-align: center;
+    color: #aaa;
+  }
+
+  .number-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  input[type="text"] {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 2.5rem;
+    font-family: 'Consolas', monospace;
+  }
+
+</style>
+
+</head>  
+
+<body>
+
+  <div id="main">
+
+
+
+
+  </div>
+
+<script>
+
+  var main = document.getElementById('main');
+
+  var formats = [
+    {
+      name: 'Binary',
+      type: 'bin',
+      base: 2,
+      convert: makeConverter(2),
+      convertToDec: function (n) { return parseInt(n, 2); },
+    },
+    {
+      name: 'Octal',
+      type: 'oct',
+      base: 8,
+      convert: function (n) { return '0' + (+n).toString(8); },
+      convertToDec: function (n) { return parseInt(n, 8); },
+    },
+    {
+      name: 'Decimal',
+      type: 'dec',
+      base: 10,
+      convert: makeConverter(10),
+      convertToDec: function (n) { return +n },
+    },
+    {
+      name: 'Hexadecimal',
+      type: 'hex',
+      base: 16,
+      convert: function (n) { return '0x' + (+n).toString(16).toUpperCase(); },
+      convertToDec: function (n) { return parseInt(n, 16); },
+    },
+    {
+      name: 'Unicode',
+      type: 'uni',
+      convert: function (n) { return String.fromCharCode(+n) },
+      convertToDec: function (n) { return n.charCodeAt(0); },
+    },
+
+  ];
+
+  function makeConverter(base) {
+
+    return function convert(n) {
+      return (+n).toString(base).toUpperCase();
+    }
+
+  }
+
+  function convertAll(n) {
+
+    formats.forEach(function(f){
+      var res = f.convert(n);
+      var inp = document.getElementById(f.type + '-input');
+      if (!/nan/i.test(res) && !/infinity/i.test(res)) {
+        inp.value = f.convert(n);
+      }
+    });
+
+  }
+
+  function makeElement(text, id, type, className, where, position, refNode) {
+    var el = document.createElement(type);
+    if (type == 'input') {
+      el.type = 'text';
+    }
+    el.id = id;
+    el.className = className;
+    el.appendChild(document.createTextNode(text));
+    // el.innerHTML = text;
+    if (position == 'after') where.appendChild(el);
+    else if (position == 'before') where.insertBefore(el, refNode);
+  }
+
+  formats.forEach(function(f){
+    makeElement('', f.type, 'div', 'number-display', main, 'after');
+    makeElement(f.name, f.type + '-label', 'span', 'number-label', document.getElementById(f.type), 'before', document.getElementById(f.type).firstChild);
+    makeElement('', f.type + '-input', 'input', 'number-input', document.getElementById(f.type), 'after');
+
+    document.getElementById(f.type + '-input').addEventListener('input', function(e){
+        // if isValid(this.value, f.type) {
+          convertAll(f.convertToDec(this.value));
+        // }
+      }, false);
+
+    document.getElementById(f.type + '-input').addEventListener('change',
+      function(e){
+
+      }, false);
+
+  });
+
+</script>
+
+</body>
+
+</html>                   
