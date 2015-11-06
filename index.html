@@ -59,90 +59,94 @@
 
 <script>
 
-  var main = document.getElementById('main');
+  (function converter(){
 
-  var formats = [
-    {
-      name: 'Binary',
-      type: 'bin',
-      base: 2,
-      convert: makeConverter(2),
-      convertToDec: function (n) { return parseInt(n, 2); },
-    },
-    {
-      name: 'Octal',
-      type: 'oct',
-      base: 8,
-      convert: function (n) { return '0' + (+n).toString(8); },
-      convertToDec: function (n) { return parseInt(n, 8); },
-    },
-    {
-      name: 'Decimal',
-      type: 'dec',
-      base: 10,
-      convert: makeConverter(10),
-      convertToDec: function (n) { return +n },
-    },
-    {
-      name: 'Hexadecimal',
-      type: 'hex',
-      base: 16,
-      convert: function (n) { return '0x' + (+n).toString(16).toUpperCase(); },
-      convertToDec: function (n) { return parseInt(n, 16); },
-    },
-    {
-      name: 'Unicode',
-      type: 'uni',
-      convert: function (n) { return String.fromCharCode(+n) },
-      convertToDec: function (n) { return n.charCodeAt(0); },
-    },
+    var main = document.getElementById('main');
 
-  ];
+    var formats = [
+      {
+        name: 'Binary',
+        type: 'bin',
+        base: 2,
+        convert: makeConverter(2),
+        convertToDec: function (n) { return parseInt(n, 2); },
+      },
+      {
+        name: 'Octal',
+        type: 'oct',
+        base: 8,
+        convert: function (n) { return '0' + (+n).toString(8); },
+        convertToDec: function (n) { return parseInt(n, 8); },
+      },
+      {
+        name: 'Decimal',
+        type: 'dec',
+        base: 10,
+        convert: makeConverter(10),
+        convertToDec: function (n) { return +n },
+      },
+      {
+        name: 'Hexadecimal',
+        type: 'hex',
+        base: 16,
+        convert: function (n) { return '0x' + (+n).toString(16).toUpperCase(); },
+        convertToDec: function (n) { return parseInt(n, 16); },
+      },
+      {
+        name: 'Unicode',
+        type: 'uni',
+        convert: function (n) { return String.fromCharCode(+n) },
+        convertToDec: function (n) { return n.charCodeAt(0); },
+      },
 
-  function makeConverter(base) {
+    ];
 
-    return function convert(n) {
-      return (+n).toString(base).toUpperCase();
+    function makeConverter(base) {
+
+      return function convert(n) {
+        return (+n).toString(base).toUpperCase();
+      }
+
     }
 
-  }
+    function convertAll(n) {
 
-  function convertAll(n) {
+      formats.forEach(function(f){
+        var res = f.convert(n);
+        var inp = document.getElementById(f.type + '-input');
+        if (!/nan/i.test(res) && !/infinity/i.test(res)) {
+          inp.value = f.convert(n);
+        }
+      });
+
+    }
+
+    function makeElement(text, id, type, className, where, position, refNode) {
+      var el = document.createElement(type);
+      if (type == 'input') {
+        el.type = 'text';
+      }
+      el.id = id;
+      el.className = className;
+      el.appendChild(document.createTextNode(text));
+      if (position == 'after') where.appendChild(el);
+      else if (position == 'before') where.insertBefore(el, refNode);
+    }
+
 
     formats.forEach(function(f){
-      var res = f.convert(n);
-      var inp = document.getElementById(f.type + '-input');
-      if (!/nan/i.test(res) && !/infinity/i.test(res)) {
-        inp.value = f.convert(n);
-      }
+
+      makeElement('', f.type, 'div', 'number-display', main, 'after');
+      makeElement(f.name, f.type + '-label', 'span', 'number-label', document.getElementById(f.type), 'before', document.getElementById(f.type).firstChild);
+      makeElement('', f.type + '-input', 'input', 'number-input', document.getElementById(f.type), 'after');
+
+      document.getElementById(f.type + '-input').addEventListener('input', function(e){
+          convertAll(f.convertToDec(this.value));
+        }, false);
+
     });
 
-  }
-
-  function makeElement(text, id, type, className, where, position, refNode) {
-    var el = document.createElement(type);
-    if (type == 'input') {
-      el.type = 'text';
-    }
-    el.id = id;
-    el.className = className;
-    el.appendChild(document.createTextNode(text));
-    if (position == 'after') where.appendChild(el);
-    else if (position == 'before') where.insertBefore(el, refNode);
-  }
-
-
-  formats.forEach(function(f){
-
-    makeElement('', f.type, 'div', 'number-display', main, 'after');
-    makeElement(f.name, f.type + '-label', 'span', 'number-label', document.getElementById(f.type), 'before', document.getElementById(f.type).firstChild);
-    makeElement('', f.type + '-input', 'input', 'number-input', document.getElementById(f.type), 'after');
-
-    document.getElementById(f.type + '-input').addEventListener('input', function(e){
-        convertAll(f.convertToDec(this.value));
-      }, false);
-
-  });
+  })();
 
 </script>
 
